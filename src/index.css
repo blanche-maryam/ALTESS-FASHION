@@ -1,0 +1,354 @@
+/* =====================================================================
+   ALTESS FASHION — DESIGN SYSTEM
+   Palette : inspirée du logo (couronne et lauriers dorés sur noir/blanc)
+   - Noir profond   #0B0B0C   → fonds, header, texte fort
+   - Or antique     #B7913C   → bordures, accents secondaires
+   - Or lumineux    #D9B25C   → CTA, survols, liens actifs
+   - Ivoire         #F7F4EE   → fonds clairs, cartes
+   - Blush discret  #E6D9CE   → touche féminine légère, badges promo
+   Typo : Cormorant Garamond (display, élégance haute couture)
+          Jost (texte courant, lisible, géométrique et sobre)
+   ===================================================================== */
+
+:root {
+  --noir: #0b0b0c;
+  --noir-doux: #17161a;
+  --or: #b7913c;
+  --or-clair: #d9b25c;
+  --ivoire: #f7f4ee;
+  --blanc: #ffffff;
+  --blush: #e6d9ce;
+  --texte-gris: #6b675f;
+  --erreur: #a33d3d;
+  --succes: #3d6b4a;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-texte: 'Jost', 'Segoe UI', sans-serif;
+
+  /* --- Surfaces et bordures --- */
+  --surface: #ffffff;
+  --surface-2: #fbf9f5;
+  --surface-inverse: #0b0b0c;
+  --bordure: rgba(183, 145, 60, 0.16);
+  --bordure-forte: rgba(183, 145, 60, 0.34);
+  --bordure-neutre: #eae4d9;
+
+  /* --- Rayons : supporters des formes arrondies douces --- */
+  --rayon: 12px;
+  --rayon-sm: 8px;
+  --rayon-lg: 20px;
+  --rayon-pill: 999px;
+
+  /* --- Élévation : trois niveaux, diffus et chauds --- */
+  --ombre-sm: 0 1px 2px rgba(11, 11, 12, 0.04), 0 2px 6px rgba(11, 11, 12, 0.04);
+  --ombre: 0 2px 8px rgba(11, 11, 12, 0.05), 0 10px 24px rgba(11, 11, 12, 0.07);
+  --ombre-lg: 0 8px 20px rgba(11, 11, 12, 0.08), 0 24px 56px rgba(11, 11, 12, 0.12);
+  --ombre-or: 0 6px 22px rgba(183, 145, 60, 0.28);
+
+  /* --- Dégradés --- */
+  --degrade-or: linear-gradient(135deg, #d9b25c 0%, #b7913c 100%);
+  --degrade-noir: linear-gradient(135deg, #0b0b0c 0%, #1c1a20 60%, #17161a 100%);
+
+  /* --- Mouvement --- */
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-lente: 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-texte);
+  color: var(--noir);
+  background: var(--ivoire);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  margin: 0 0 0.5em;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); }
+h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); }
+h3 { font-size: 1.4rem; }
+
+p { margin: 0 0 1em; color: var(--noir-doux); }
+
+/* Les titres de section portent une ligne dorée discrète : signature visuelle
+   répétée sur l'accueil, la boutique et les catégories. */
+.section h2::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 2px;
+  margin-top: 14px;
+  border-radius: var(--rayon-pill);
+  background: var(--degrade-or);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img { max-width: 100%; display: block; }
+
+button, input, select, textarea {
+  font-family: var(--font-texte);
+  font-size: 1rem;
+}
+
+/* Anneau de focus visible partout : clavier uniquement, jamais au clic. */
+:focus-visible {
+  outline: 2px solid var(--or);
+  outline-offset: 3px;
+  border-radius: var(--rayon-sm);
+}
+
+::selection {
+  background: var(--or);
+  color: var(--noir);
+}
+
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Boutons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 30px;
+  border: 1px solid transparent;
+  border-radius: var(--rayon-pill);
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition), border-color var(--transition),
+    box-shadow var(--transition), transform var(--transition);
+}
+
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+
+.btn-primaire {
+  background: var(--noir);
+  color: var(--or-clair);
+  border-color: var(--noir);
+}
+.btn-primaire:hover:not(:disabled) {
+  background: var(--noir-doux);
+  box-shadow: var(--ombre);
+}
+
+.btn-or {
+  background: var(--degrade-or);
+  color: var(--noir);
+  border-color: transparent;
+  font-weight: 600;
+}
+.btn-or:hover:not(:disabled) {
+  background: var(--degrade-or);
+  box-shadow: var(--ombre-or);
+}
+
+.btn-contour {
+  background: var(--surface);
+  color: var(--noir);
+  border-color: var(--bordure-neutre);
+}
+.btn-contour:hover:not(:disabled) {
+  background: var(--noir);
+  color: var(--blanc);
+  border-color: var(--noir);
+  box-shadow: var(--ombre);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- Champs de formulaire --- */
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.champ label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texte-gris);
+}
+.champ input,
+.champ select,
+.champ textarea {
+  padding: 12px 15px;
+  border: 1px solid var(--bordure-neutre);
+  border-radius: var(--rayon-sm);
+  background: var(--surface);
+  color: var(--noir);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.champ input:hover,
+.champ select:hover,
+.champ textarea:hover { border-color: var(--bordure-forte); }
+.champ input:focus,
+.champ select:focus,
+.champ textarea:focus {
+  outline: none;
+  border-color: var(--or);
+  box-shadow: 0 0 0 4px rgba(183, 145, 60, 0.14);
+}
+.champ input::placeholder,
+.champ textarea::placeholder { color: #a9a49a; }
+
+/* --- Petit badge (promo, nouveauté) --- */
+.badge {
+  display: inline-block;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--rayon-pill);
+  background: var(--blush);
+  color: var(--noir);
+}
+.badge-or {
+  background: var(--degrade-or);
+  color: var(--noir);
+}
+.badge-dark {
+  background: var(--noir);
+  color: var(--or-clair);
+}
+
+.btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+.btn-xs { padding: 6px 12px; font-size: 0.74rem; }
+.btn-lg { padding: 16px 40px; font-size: 1rem; }
+.btn-block { width: 100%; }
+.btn-danger {
+  background: transparent;
+  color: var(--erreur);
+  border-color: var(--erreur);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--erreur);
+  color: var(--blanc);
+  border-color: var(--erreur);
+  box-shadow: 0 6px 18px rgba(163, 61, 61, 0.25);
+}
+
+.muted { color: var(--texte-gris); }
+.small { font-size: 0.78rem; }
+.padding { padding: 32px 0; }
+.pre-line { white-space: pre-line; }
+.right { text-align: right; }
+.nowrap { white-space: nowrap; }
+.grow { flex: 1 1 240px; }
+.column-gap { display: flex; flex-direction: column; gap: 8px; }
+.full { grid-column: 1 / -1; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Les titres de pages et sections s'animent à l'apparition, très légèrement :
+   assez pour moderniser, pas assez pour gêner. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --- Révélation au défilement ---
+   L'état de départ est posé par `.reveal` seul. Le composant qui gère
+   l'observateur ajoute `.is-revealed` : sans JavaScript le contenu reste
+   visible, ce qui est le comportement attendu. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-revealed { opacity: 1; transform: none; }
+
+.reveal-scale {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-scale.is-revealed { opacity: 1; transform: none; }
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-28px);
+  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-left.is-revealed { opacity: 1; transform: none; }
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(28px);
+  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-right.is-revealed { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* Les animations d'apparition partent d'opacité 0 : sans cela, un visitor
+     en mouvement réduit qui n'exécute pas le JS verrait des sections vides. */
+  .reveal,
+  .reveal-scale,
+  .reveal-left,
+  .reveal-right {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 0 16px; }
+}

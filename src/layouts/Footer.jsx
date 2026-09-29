@@ -1,0 +1,37 @@
+import { Link } from 'react-router-dom';
+import Brand from '../components/Brand.jsx';
+import { Nom_Entrprise, Contact_Infos, WhatsApp_Lien } from '../global.jsx';
+
+export default function Footer() {
+  return (
+    <footer className="footer">
+      <div className="container footer-grid">
+        <div className="footer-brand">
+          <Brand size={44} />
+          <p>Mode haut de gamme pour femmes et hommes. Élégance, qualité et style.</p>
+        </div>
+        <div className="footer-col">
+          <h4>Boutique</h4>
+          <Link to="/boutique">Tous les produits</Link>
+          <Link to="/femme">Collection Femme</Link>
+          <Link to="/homme">Collection Homme</Link>
+        </div>
+        <div className="footer-col">
+          <h4>Informations</h4>
+          <Link to="/a-propos">À propos</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/mes-commandes">Mes commandes</Link>
+        </div>
+        <div className="footer-col">
+          <h4>Contact</h4>
+          <a href={`mailto:${Contact_Infos.email}`}>{Contact_Infos.email}</a>
+          <a href={WhatsApp_Lien} target="_blank" rel="noopener noreferrer">{Contact_Infos.telephone}</a>
+          <p>{Contact_Infos.adresse}</p>
+        </div>
+      </div>
+      <div className="container footer-bottom">
+        <p>© {new Date().getFullYear()} {Nom_Entrprise}. Tous droits réservés.</p>
+      </div>
+    </footer>
+  );
+}

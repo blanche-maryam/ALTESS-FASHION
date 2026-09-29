@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="50" viewBox="0 0 280 50">
+  <text x="0" y="36" font-family="Georgia, serif" font-size="32" font-weight="bold" fill="#D9B25C" letter-spacing="3">ALTESS</text>
+  <text x="118" y="36" font-family="Georgia, serif" font-size="32" font-weight="normal" fill="#FFFFFF" letter-spacing="3">FASHION</text>
+  <line x1="0" y1="42" x2="280" y2="42" stroke="#B7913C" stroke-width="1"/>
+</svg>
