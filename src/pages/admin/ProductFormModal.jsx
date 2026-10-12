@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { productService } from '../../services/productService.js';
 import { uploadService } from '../../services/uploadService.js';
 import { extractError } from '../../services/api.js';
@@ -54,17 +54,37 @@ export default function ProductFormModal({ open, product, categories, onClose, o
   const toast = useToast();
   const [form, setForm] = useState(EMPTY);
   const [images, setImages] = useState([]);
+  // Fichiers choisis avant la création : le produit n'a pas encore d'ID, donc
+  // on ne peut pas les téléverser tout de suite. Ils partent juste après.
+  const [pending, setPending] = useState([]);
   const [saving, setSaving] = useState(false);
+  const pendingRef = useRef([]);
   const [error, setError] = useState('');
 
   const isEdit = Boolean(product?.id);
+
+  const clearPending = useCallback(() => {
+    pendingRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    pendingRef.current = [];
+    setPending([]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     setForm(toForm(product));
     setImages(product?.images || []);
+    clearPending();
     setError('');
-  }, [open, product]);
+  }, [open, product, clearPending]);
+
+  // pendingRef.current est l'unique source de vérité : il est écrit de façon
+  // synchrone avant chaque setPending, donc le nettoyage au démontage dispose
+  // toujours des URL d'objet à libérer.
+  useEffect(() => {
+    return () => {
+      pendingRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    };
+  }, []);
 
   // Les catégories racines sont scopées par public, donc un même nom revient
   // plusieurs fois. On regroupe par racine et, dans chaque groupe, on ne
@@ -109,7 +129,15 @@ export default function ProductFormModal({ open, product, categories, onClose, o
 
   const handleUpload = useCallback(async (files) => {
     if (!isEdit) {
-      toast.error("Enregistrez d'abord le produit pour ajouter des images.");
+      const added = files.map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+        name: file.name,
+        pending: true,
+      }));
+      const next = [...pendingRef.current, ...added];
+      pendingRef.current = next;
+      setPending(next);
       return;
     }
     try {
@@ -122,6 +150,13 @@ export default function ProductFormModal({ open, product, categories, onClose, o
   }, [isEdit, product, toast]);
 
   const handleRemoveImage = useCallback(async (image) => {
+    if (image.pending) {
+      URL.revokeObjectURL(image.previewUrl);
+      const next = pendingRef.current.filter((p) => p.previewUrl !== image.previewUrl);
+      pendingRef.current = next;
+      setPending(next);
+      return;
+    }
     try {
       const data = await uploadService.removeFromProduct(product.id, image.id);
       setImages(data.images || []);
@@ -191,6 +226,21 @@ export default function ProductFormModal({ open, product, categories, onClose, o
       const data = isEdit
         ? await productService.update(product.id, payload)
         : await productService.create(payload);
+
+      // Les images choisies avant la création sont téléversées maintenant que
+      // le produit existe. Un échec ici ne doit pas faire perdre le produit.
+      const queued = pendingRef.current;
+      if (!isEdit && queued.length) {
+        const files = queued.map((p) => p.file);
+        try {
+          await uploadService.attachToProduct(data.id, files);
+          toast.success(`${files.length} image(s) ajoutée(s) au produit`);
+        } catch (uploadErr) {
+          toast.error(`Produit créé, mais l'envoi des images a échoué : ${extractError(uploadErr, "Réessayez")}`);
+        }
+        clearPending();
+      }
+
       toast.success(data.message || (isEdit ? 'Produit mis à jour' : 'Produit créé'));
       onSaved?.(data);
       onClose?.();
@@ -343,11 +393,15 @@ export default function ProductFormModal({ open, product, categories, onClose, o
         <fieldset className="full">
           <legend>Images</legend>
           <ImageUploader
-            images={images}
+            images={[...images, ...pending]}
             onUpload={handleUpload}
             onRemove={handleRemoveImage}
             onSetPrimary={handlePrimaryImage}
             disabled={saving}
+            deferred={!isEdit}
+            hint={!isEdit && pending.length
+              ? 'Ces images seront ajoutées automatiquement quand vous cliquez sur « Créer le produit ».'
+              : ''}
           />
         </fieldset>
 

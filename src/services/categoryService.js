@@ -16,8 +16,9 @@ export const categoryService = {
     const res = await api.get('/categories.php' + toQuery(params));
     return res.data;
   },
-  getTree: async () => {
-    const res = await api.get('/categories.php?tree=1');
+  getTree: async (params = {}) => {
+    const qs = toQuery(params);
+    const res = await api.get('/categories.php?tree=1' + (qs ? '&' + qs.slice(1) : ''));
     return res.data;
   },
   getRoots: async () => {

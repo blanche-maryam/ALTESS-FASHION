@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
 import { extractError } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import Reveal from '../components/Reveal.jsx';
 
 export default function Register() {
   const [form, setForm] = useState({ lastname: '', firstname: '', email: '', phone: '', password: '', password_confirm: '', address: '' });
@@ -31,21 +32,30 @@ export default function Register() {
 
   return (
     <div className="container page-auth">
-      <div className="auth-card">
+      <Reveal variant="scale" className="auth-card">
         <h1>Inscription</h1>
-        {error && <p className="error-msg">{error}</p>}
+        {error && <p className="error-msg anim-shake">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="champ"><label>Nom</label><input name="lastname" value={form.lastname} onChange={handleChange} required /></div>
-          <div className="champ"><label>Prénom</label><input name="firstname" value={form.firstname} onChange={handleChange} required /></div>
-          <div className="champ"><label>Email</label><input type="email" name="email" value={form.email} onChange={handleChange} required /></div>
-          <div className="champ"><label>Téléphone</label><input name="phone" value={form.phone} onChange={handleChange} /></div>
-          <div className="champ"><label>Mot de passe</label><input type="password" name="password" value={form.password} onChange={handleChange} required minLength={6} /></div>
-          <div className="champ"><label>Confirmer le mot de passe</label><input type="password" name="password_confirm" value={form.password_confirm} onChange={handleChange} required /></div>
-          <div className="champ"><label>Adresse</label><textarea name="address" value={form.address} onChange={handleChange} /></div>
-          <button type="submit" className="btn btn-primaire" disabled={loading}>{loading ? 'Inscription...' : "Créer mon compte"}</button>
+          {[
+            ['lastname','Nom'],['firstname','Prénom'],['email','Email','email'],
+            ['phone','Téléphone'],['password','Mot de passe','password'],
+            ['password_confirm','Confirmer le mot de passe','password'],['address','Adresse']
+          ].map(([name,label,type],i) => (
+            <Reveal key={name} index={i} step={70} className="champ">
+              <label>{label}</label>
+              {name === 'address' ? (
+                <textarea name={name} value={form[name]} onChange={handleChange} />
+              ) : (
+                <input type={type || 'text'} name={name} value={form[name]} onChange={handleChange} required={name !== 'phone'} />
+              )}
+            </Reveal>
+          ))}
+          <Reveal index={7} step={70}>
+            <button type="submit" className="btn btn-primaire" disabled={loading}>{loading ? 'Inscription...' : "Créer mon compte"}</button>
+          </Reveal>
         </form>
-        <div className="auth-links"><Link to="/connexion">Déjà un compte ? Se connecter</Link></div>
-      </div>
+        <Reveal index={8} step={70} className="auth-links"><Link to="/connexion">Déjà un compte ? Se connecter</Link></Reveal>
+      </Reveal>
     </div>
   );
 }

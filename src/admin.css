@@ -106,14 +106,48 @@
 
 .admin-page-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 22px;
   flex-wrap: wrap;
 }
-.admin-page-header h1 { font-size: 2rem; margin: 0; }
-.admin-page-header p { margin: 4px 0 0; }
+.admin-page-header > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+/* Titre de page back-office : même signature que le site public —
+   bandeau aux reflets dorés, liseré centré, sheen lent. */
+.admin-page-header h1 {
+  display: inline-block;
+  font-size: 2rem;
+  margin: 0;
+  padding: 0.2em 1em 0.4em;
+  background: linear-gradient(115deg, var(--surface) 0%, rgba(217, 178, 92, 0.16) 45%, var(--surface-2) 100%);
+  background-size: 220% 100%;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre-sm);
+  animation: title-sheen 7s ease-in-out infinite;
+  transition: box-shadow var(--transition-lente), translate var(--transition-lente);
+}
+.admin-page-header h1::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin: 0.35em auto 0;
+  border-radius: var(--rayon-pill);
+  background: var(--degrade-or);
+  box-shadow: 0 1px 6px rgba(183, 145, 60, 0.45);
+  animation: title-line 900ms var(--ease-out) both;
+}
+.admin-page-header h1:hover {
+  translate: 0 -2px;
+  box-shadow: var(--ombre);
+}
+.admin-page-header p { margin: 6px 0 0; }
 
 /* ---------- Filtres ---------- */
 .admin-filters {
@@ -277,15 +311,22 @@ button.switch:focus-visible { outline: 2px solid var(--or); outline-offset: 2px;
 /* ---------- Pagination ---------- */
 .pagination {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
   flex-wrap: wrap;
-  margin-top: 18px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
 }
 .pagination-info { font-size: 0.84rem; color: var(--texte-gris); }
-.pagination-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-.pagination-gap { color: var(--texte-gris); padding: 0 2px; }
+.pagination-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pagination-controls .btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+}
+.pagination-gap { color: var(--texte-gris); padding: 0 4px; }
+.pagination button { animation: pagination-btn-in 300ms var(--ease-out) backwards; }
 
 /* ---------- Arbre des catégories ---------- */
 .tree, .tree-children { list-style: none; margin: 0; padding: 0; }
@@ -415,7 +456,23 @@ button.switch:focus-visible { outline: 2px solid var(--or); outline-offset: 2px;
 .modal-md { max-width: 640px; }
 .modal-lg { max-width: 1000px; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--bordure-neutre); }
-.modal-header h2 { font-size: 1.3rem; margin: 0; }
+.modal-header h2 {
+  font-size: 1.3rem;
+  margin: 0;
+  position: relative;
+  padding-bottom: 8px;
+}
+.modal-header h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 2px;
+  border-radius: var(--rayon-pill);
+  background: var(--degrade-or);
+  animation: title-line 700ms var(--ease-out) both;
+}
 .modal-close {
   background: none;
   border: none;
@@ -476,7 +533,23 @@ button.switch:focus-visible { outline: 2px solid var(--or); outline-offset: 2px;
   box-shadow: var(--ombre-sm);
 }
 .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-.panel-header h2 { font-size: 1.15rem; margin: 0; }
+.panel-header h2 {
+  font-size: 1.15rem;
+  margin: 0;
+  position: relative;
+  padding-bottom: 8px;
+}
+.panel-header h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: var(--rayon-pill);
+  background: var(--degrade-or);
+  animation: title-line 700ms var(--ease-out) both;
+}
 
 .revenue-chart { display: flex; flex-direction: column; gap: 14px; }
 .sparkline { width: 100%; height: 60px; color: var(--or); }

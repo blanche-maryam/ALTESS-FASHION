@@ -68,6 +68,11 @@ body {
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Scrollbar toujours réservée : évite le saut horizontal
+     (la page qui « descend ») quand la barre apparaît au
+     défilement — comportement variable selon le navigateur. */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -93,16 +98,87 @@ h3 { font-size: 1.4rem; }
 
 p { margin: 0 0 1em; color: var(--noir-doux); }
 
-/* Les titres de section portent une ligne dorée discrète : signature visuelle
-   répétée sur l'accueil, la boutique et les catégories. */
-.section h2::after {
+/* --- Titres : bandeau, centrage, animation ---
+   Signature de la maison : chaque titre de section et chaque titre
+   de page repose sur un bandeau ivoire aux reflets dorés qui
+   se pare d'un sheen lent, surmonté du liseré doré centré.
+   Le tout est centré, fluide (clamp) et respire au survol.
+   La propriété `translate` est utilisée au survol pour ne pas
+   perturber les transitions `transform` du composant Reveal. */
+.section h2,
+.section-title {
+  text-align: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 1.9em;
+  padding: 0.62em clamp(1.3rem, 3.5vw, 2.2rem) 1.05em;
+  background: linear-gradient(115deg, var(--surface) 0%, rgba(217, 178, 92, 0.16) 45%, var(--surface-2) 100%);
+  background-size: 220% 100%;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-lg);
+  box-shadow: var(--ombre-sm);
+  animation: title-sheen 7s ease-in-out infinite;
+  transition: box-shadow var(--transition-lente), translate var(--transition-lente);
+}
+.section h2:hover,
+.section-title:hover {
+  translate: 0 -3px;
+  box-shadow: var(--ombre);
+}
+.section h2::after,
+.section-title::after {
   content: '';
   display: block;
   width: 48px;
   height: 2px;
-  margin-top: 14px;
+  margin: 0.5em auto 0;
   border-radius: var(--rayon-pill);
   background: var(--degrade-or);
+  box-shadow: 0 1px 6px rgba(183, 145, 60, 0.45);
+  animation: title-line 900ms var(--ease-out) both;
+}
+@keyframes title-sheen {
+  0%, 100% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
+}
+@keyframes title-line {
+  from { width: 0; opacity: 0; }
+  to { width: 48px; opacity: 1; }
+}
+
+/* Titres de page (h1) : même traitement, plus ample */
+.page-title {
+  text-align: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.15em auto 1.1em;
+  padding: 0.45em clamp(1.5rem, 4.5vw, 2.8rem) 0.9em;
+  background: linear-gradient(115deg, var(--surface) 0%, rgba(217, 178, 92, 0.2) 45%, var(--surface-2) 100%);
+  background-size: 220% 100%;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-lg);
+  box-shadow: var(--ombre);
+  animation: title-sheen 7s ease-in-out infinite;
+  transition: box-shadow var(--transition-lente), translate var(--transition-lente);
+}
+.page-title:hover {
+  translate: 0 -3px;
+  box-shadow: var(--ombre-lg);
+}
+.page-title::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 2px;
+  margin: 0.45em auto 0;
+  border-radius: var(--rayon-pill);
+  background: var(--degrade-or);
+  box-shadow: 0 1px 8px rgba(183, 145, 60, 0.5);
+  animation: title-line-lg 900ms var(--ease-out) both;
+}
+@keyframes title-line-lg {
+  from { width: 0; opacity: 0; }
+  to { width: 56px; opacity: 1; }
 }
 
 a {
@@ -288,11 +364,130 @@ button, input, select, textarea {
   white-space: nowrap;
 }
 
-/* Les titres de pages et sections s'animent à l'apparition, très légèrement :
-   assez pour moderniser, pas assez pour gêner. */
-@keyframes rise {
+/* =====================================================================
+   UTILITAIRES D'ANIMATION
+   ===================================================================== */
+
+/* ---- Apparitions au chargement ---- */
+.anim-fade-in { animation: fade-in 500ms var(--ease-out) both; }
+.anim-rise { animation: rise var(--transition-lente) var(--ease-out) both; }
+.anim-rise-delay-1 { animation: rise var(--transition-lente) 80ms var(--ease-out) both; }
+.anim-rise-delay-2 { animation: rise var(--transition-lente) 160ms var(--ease-out) both; }
+.anim-rise-delay-3 { animation: rise var(--transition-lente) 240ms var(--ease-out) both; }
+.anim-scale-in { animation: scale-in 450ms var(--ease-out) both; }
+
+/* ---- Skeleton / shimmer ---- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bordure-neutre);
+  border-radius: var(--rayon-sm);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+/* ---- Cart badge ---- */
+.cart-badge-animate { animation: badge-pop 320ms var(--ease-out); }
+
+/* ---- Toast (géré par le contexte, mais les classes existent si besoin) ---- */
+.toast-enter { animation: toast-in 320ms var(--ease-out) both; }
+.toast-exit { animation: toast-out 240ms var(--ease-out) both; }
+
+/* ---- Float doux (décorations, héros secondaires) ---- */
+.anim-float { animation: float 4s ease-in-out infinite; }
+
+/* ---- Page transition ---- */
+.page-enter { animation: page-enter 320ms var(--ease-out) both; }
+
+/* ---- Badge pop (panier, notifications) ---- */
+.anim-pop { animation: badge-pop 320ms var(--ease-out); }
+
+/* ---- Shake (erreurs) ---- */
+.anim-shake { animation: shake 420ms ease-in-out; }
+
+/* ---- Pulse doux (états de chargement, badges live) ---- */
+.anim-pulse { animation: pulse-soft 2.2s ease-in-out infinite; }
+
+/* ---- Skeleton / shimmer ---- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bordure-neutre);
+  border-radius: var(--rayon-sm);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+.skeleton-circle { border-radius: 50%; }
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-12px) scale(0.96); }
+}
+@keyframes badge-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes page-enter {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 
 /* --- Révélation au défilement ---

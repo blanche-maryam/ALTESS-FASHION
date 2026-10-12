@@ -36,7 +36,17 @@ if ($method === 'GET') {
     }
 
     if (!empty($_GET['tree'])) {
-        apiJson(['categories' => $categoryModel->getTree(), 'flat' => $categoryModel->getAll(false)]);
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = max(1, min(100, (int) ($_GET['per_page'] ?? 10)));
+        $total = $categoryModel->countRoots();
+        apiJson([
+            'categories' => $categoryModel->getTree($page, $perPage),
+            'flat'       => $categoryModel->getAll(false),
+            'total'      => $total,
+            'page'       => $page,
+            'per_page'   => $perPage,
+            'pages'      => (int) ceil($total / $perPage),
+        ]);
     }
 
     if (!empty($_GET['roots'])) {

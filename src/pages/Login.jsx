@@ -4,6 +4,7 @@ import { authService } from '../services/authService.js';
 import { extractError } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import Reveal from '../components/Reveal.jsx';
 
 export default function Login() {
   const [params] = useSearchParams();
@@ -47,11 +48,11 @@ export default function Login() {
 
   return (
     <div className="container page-auth">
-      <div className="auth-card">
+      <Reveal variant="scale" className="auth-card">
         <h1>Connexion</h1>
-        {error && <p className="error-msg">{error}</p>}
+        {error && <p className="error-msg anim-shake">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="champ">
+          <Reveal index={0} step={70} className="champ">
             <label htmlFor="login-email">Email</label>
             <input
               id="login-email"
@@ -61,8 +62,8 @@ export default function Login() {
               autoComplete="email"
               required
             />
-          </div>
-          <div className="champ">
+          </Reveal>
+          <Reveal index={1} step={70} className="champ">
             <label htmlFor="login-pass">Mot de passe</label>
             <input
               id="login-pass"
@@ -72,16 +73,18 @@ export default function Login() {
               autoComplete="current-password"
               required
             />
-          </div>
-          <button type="submit" className="btn btn-or btn-block" disabled={loading}>
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </button>
+          </Reveal>
+          <Reveal index={2} step={70}>
+            <button type="submit" className="btn btn-or btn-block" disabled={loading}>
+              {loading ? 'Connexion...' : 'Se connecter'}
+            </button>
+          </Reveal>
         </form>
-        <div className="auth-links">
+        <Reveal index={3} step={70} className="auth-links">
           <Link to="/">Retour à la boutique</Link>
           <Link to="/inscription">Pas encore de compte ? S'inscrire</Link>
-        </div>
-      </div>
+        </Reveal>
+      </Reveal>
     </div>
   );
 }

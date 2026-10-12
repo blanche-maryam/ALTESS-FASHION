@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 import { ORDER_STATUSES, statusLabel } from '../../utils/constants.js';
 import { formatPrice, formatDate } from '../../utils/helpers.js';
 import { productThumb } from '../../utils/images.js';
+import Reveal from '../../components/Reveal.jsx';
 
 function Sparkline({ series }) {
   if (!series || series.length === 0) return null;
@@ -65,26 +66,28 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-page">
-      <header className="admin-page-header">
+      <Reveal className="admin-page-header">
         <div>
           <h1>Tableau de bord</h1>
           <p className="muted">Vue d'ensemble de la boutique</p>
         </div>
         <button type="button" className="btn btn-contour" onClick={load}>Actualiser</button>
-      </header>
+      </Reveal>
 
       <section className="stats-grid">
-        {cards.map((c) => (
-          <div key={c.label} className="stat-card">
-            <h3>{c.label}</h3>
-            <p>{c.value}</p>
-            <span className="muted small">{c.hint}</span>
-          </div>
+        {cards.map((c, i) => (
+          <Reveal key={c.label} index={i} step={90}>
+            <div className="stat-card">
+              <h3>{c.label}</h3>
+              <p>{c.value}</p>
+              <span className="muted small">{c.hint}</span>
+            </div>
+          </Reveal>
         ))}
       </section>
 
       <div className="dashboard-split">
-        <section className="panel">
+        <Reveal index={6} step={120} className="panel">
           <header className="panel-header">
             <h2>Chiffre d'affaires (6 mois)</h2>
           </header>
@@ -100,9 +103,9 @@ export default function AdminDashboard() {
               ))}
             </ul>
           </div>
-        </section>
+        </Reveal>
 
-        <section className="panel">
+        <Reveal index={7} step={120} className="panel">
           <header className="panel-header"><h2>Commandes par statut</h2></header>
           <ul className="bar-list">
             {ORDER_STATUSES.map((s) => {
@@ -117,11 +120,11 @@ export default function AdminDashboard() {
               );
             })}
           </ul>
-        </section>
+        </Reveal>
       </div>
 
       <div className="dashboard-split">
-        <section className="panel">
+        <Reveal index={8} step={120} className="panel">
           <header className="panel-header">
             <h2>Dernières commandes</h2>
             <Link to="/admin/commandes" className="btn btn-contour btn-xs">Tout voir</Link>
@@ -133,22 +136,22 @@ export default function AdminDashboard() {
               <table className="admin-table compact">
                 <thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Total</th><th>Statut</th></tr></thead>
                 <tbody>
-                  {stats.recent_orders.map((o) => (
-                    <tr key={o.id}>
+                  {stats.recent_orders.map((o, i) => (
+                    <Reveal key={o.id} as="tr" index={i} step={40}>
                       <td>{o.order_number}</td>
                       <td>{o.firstname} {o.lastname}</td>
                       <td>{formatDate(o.created_at)}</td>
                       <td>{formatPrice(o.total)}</td>
                       <td><span className={`status status-${o.status}`}>{statusLabel(o.status)}</span></td>
-                    </tr>
+                    </Reveal>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </section>
+        </Reveal>
 
-        <section className="panel">
+        <Reveal index={9} step={120} className="panel">
           <header className="panel-header">
             <h2>Alertes de stock</h2>
             <Link to="/admin/produits" className="btn btn-contour btn-xs">Gérer</Link>
@@ -157,39 +160,39 @@ export default function AdminDashboard() {
             <p className="muted">Tous les stocks sont suffisants.</p>
           ) : (
             <ul className="mini-list">
-              {stats.low_stock_products.map((p) => (
-                <li key={p.id}>
+              {stats.low_stock_products.map((p, i) => (
+                <Reveal key={p.id} as="li" index={i} step={50}>
                   <img src={productThumb(p)} alt="" className="cell-thumb" />
                   <div>
                     <strong>{p.name}</strong>
                     <span className="muted small">{formatPrice(p.price)}</span>
                   </div>
                   <span className={`stock-pill ${Number(p.stock) === 0 ? 'out' : 'low'}`}>{p.stock}</span>
-                </li>
+                </Reveal>
               ))}
             </ul>
           )}
-        </section>
+        </Reveal>
       </div>
 
       {stats.top_products.length > 0 && (
-        <section className="panel">
+        <Reveal index={10} step={120} className="panel">
           <header className="panel-header"><h2>Meilleures ventes</h2></header>
           <div className="admin-table-wrap">
             <table className="admin-table compact">
               <thead><tr><th>Produit</th><th className="right">Quantité</th><th className="right">Chiffre d'affaires</th></tr></thead>
               <tbody>
-                {stats.top_products.map((p) => (
-                  <tr key={p.product_id}>
+                {stats.top_products.map((p, i) => (
+                  <Reveal key={p.product_id} as="tr" index={i} step={40}>
                     <td>{p.product_name}</td>
                     <td className="right">{p.qty}</td>
                     <td className="right">{formatPrice(p.revenue)}</td>
-                  </tr>
+                  </Reveal>
                 ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </Reveal>
       )}
     </div>
   );

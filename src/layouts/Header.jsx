@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Brand from '../components/Brand.jsx';
 
@@ -10,9 +10,25 @@ export default function Header() {
   const { user } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [bump, setBump] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!totalItems) return;
+    setBump(false);
+    const t = requestAnimationFrame(() => setBump(true));
+    return () => cancelAnimationFrame(t);
+  }, [totalItems]);
 
   return (
-    <header className="header">
+    <header className={`header${scrolled ? ' header--scrolled' : ''}`}>
       <div className="container header-inner">
         <Brand size={42} />
         <nav className={`nav-desktop ${menuOpen ? 'open' : ''}`}>
@@ -30,7 +46,7 @@ export default function Header() {
           </Link>
           <Link to="/panier" className="icon-btn cart-btn" title="Panier">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+            {totalItems > 0 && <span className={`cart-badge${bump ? ' cart-badge-animate' : ''}`}>{totalItems}</span>}
           </Link>
           {user ? (
             <div className="user-menu">

@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../ProductCard.jsx';
 import Loader from '../Loader.jsx';
 import Reveal from '../Reveal.jsx';
+import Pagination from '../Pagination.jsx';
 import { productService } from '../../services/productService.js';
 import { categoryService } from '../../services/categoryService.js';
 import { extractError } from '../../services/api.js';
@@ -87,7 +88,7 @@ export default function CatalogPage({ lockedGender, title, intro, emptyMessage =
 
   return (
     <div className="page-shop container">
-      <h1>{title}</h1>
+      <h1 className="page-title">{title}</h1>
       {intro && <p className="muted catalog-intro">{intro}</p>}
 
       <div className="shop-filters">
@@ -196,18 +197,18 @@ export default function CatalogPage({ lockedGender, title, intro, emptyMessage =
             ))}
           </div>
           {pages > 1 && (
-            <nav className="catalog-pagination" aria-label="Pagination">
-              <button type="button" className="btn btn-contour" onClick={() => setPage(page - 1)} disabled={page <= 1}>
-                ‹ Précédent
-              </button>
-              <span className="muted">Page {page} sur {pages}</span>
-              <button type="button" className="btn btn-contour" onClick={() => setPage(page + 1)} disabled={page >= pages}>
-                Suivant ›
-              </button>
-            </nav>
+            <Pagination
+              page={page}
+              pages={pages}
+              total={total}
+              perPage={PER_PAGE}
+              onChange={setPage}
+              itemLabel="produit"
+            />
           )}
         </>
       )}
     </div>
   );
 }
+

@@ -48,8 +48,17 @@ if ($method === 'GET') {
     $filters = [];
     if (!empty($_GET['search'])) $filters['search'] = $_GET['search'];
     if (!empty($_GET['role'])) $filters['role'] = $_GET['role'];
+    $page = max(1, (int) ($_GET['page'] ?? 1));
+    $perPage = max(1, min(100, (int) ($_GET['per_page'] ?? 20)));
 
-    apiJson(['users' => $userModel->getAll($filters['search'] ?? null, $filters['role'] ?? null)]);
+    $total = $userModel->countAll($filters['search'] ?? null, $filters['role'] ?? null);
+    apiJson([
+        'users'    => $userModel->getAll($filters['search'] ?? null, $filters['role'] ?? null, $page, $perPage),
+        'total'    => $total,
+        'page'     => $page,
+        'per_page' => $perPage,
+        'pages'    => (int) ceil($total / $perPage),
+    ]);
 }
 
 // -------------------------------------------------------------------------

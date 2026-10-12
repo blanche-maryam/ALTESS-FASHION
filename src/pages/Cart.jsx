@@ -7,6 +7,7 @@ import CartItem from '../components/CartItem.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { formatPrice } from '../utils/helpers.js';
+import Reveal from '../components/Reveal.jsx';
 import { PAYMENT_METHODS } from '../utils/constants.js';
 
 export default function Cart() {
@@ -67,10 +68,10 @@ export default function Cart() {
     return (
       <div className="container page-cart">
         <div className="empty-cart">
-          <h1>Commande passée !</h1>
-          {orderNumber && <p>Numéro de suivi : <strong>{orderNumber}</strong></p>}
-          <p>Vous pouvez suivre son statut depuis votre espace.</p>
-          <div className="checkout-actions">
+          <h1 className="anim-scale-in page-title">Commande passée !</h1>
+          {orderNumber && <p className="anim-rise-delay-1">Numéro de suivi : <strong>{orderNumber}</strong></p>}
+          <p className="anim-rise-delay-2">Vous pouvez suivre son statut depuis votre espace.</p>
+          <div className="checkout-actions anim-rise-delay-3">
             <Link to="/mes-commandes" className="btn btn-or">Mes commandes</Link>
             <Link to="/boutique" className="btn btn-contour">Continuer mes achats</Link>
           </div>
@@ -80,8 +81,8 @@ export default function Cart() {
   }
 
   return (
-    <div className="container page-cart">
-      <h1>Mon panier ({totalItems})</h1>
+    <div className="container page-cart page-enter">
+      <Reveal as="h1" className="page-title">Mon panier ({totalItems})</Reveal>
 
       {items.length === 0 ? (
         <div className="empty-cart">
@@ -90,23 +91,33 @@ export default function Cart() {
         </div>
       ) : (
         <>
-          {items.map((item) => (
-            <CartItem
-              key={`${item.product_id}-${item.size ?? ''}-${item.color ?? ''}`}
-              item={item}
-              onUpdate={(quantity) => updateQuantity(item.product_id, quantity, item.size, item.color)}
-              onRemove={() => removeFromCart(item.product_id, item.size, item.color)}
-            />
-          ))}
-
-          <div className="cart-summary">
-            <div className="cart-row"><span>Sous-total</span><span>{formatPrice(totalPrice)}</span></div>
-            <div className="cart-row"><span>Livraison</span><span>Gratuite</span></div>
-            <div className="cart-row cart-total"><span>Total</span><span>{formatPrice(totalPrice)}</span></div>
+          <div className="cart-list">
+            {items.map((item, i) => (
+              <Reveal key={`${item.product_id}-${item.size ?? ''}-${item.color ?? ''}`} index={i} step={70}>
+                <CartItem
+                  item={item}
+                  onUpdate={(quantity) => updateQuantity(item.product_id, quantity, item.size, item.color)}
+                  onRemove={() => removeFromCart(item.product_id, item.size, item.color)}
+                />
+              </Reveal>
+            ))}
           </div>
 
-          <div className="checkout-section">
-            {error && <p className="error-msg">{error}</p>}
+          <Reveal index={items.length} step={70} className="cart-summary-wrap">
+            <div className="cart-summary">
+              <div className="cart-summary-row">
+                <span>Sous-total</span>
+                <span>{formatPrice(totalPrice)}</span>
+              </div>
+              <div className="cart-summary-row cart-summary-total">
+                <span>Total</span>
+                <span>{formatPrice(totalPrice)}</span>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal index={items.length + 1} step={70} className="checkout-section">
+            {error && <p className="error-msg anim-shake">{error}</p>}
             <div className="champ">
               <label htmlFor="ship">Adresse de livraison</label>
               <textarea
@@ -127,7 +138,7 @@ export default function Cart() {
             <button type="button" className="btn btn-or btn-lg" onClick={handleCheckout} disabled={loading}>
               {loading ? 'Traitement...' : 'Passer la commande'}
             </button>
-          </div>
+          </Reveal>
         </>
       )}
     </div>

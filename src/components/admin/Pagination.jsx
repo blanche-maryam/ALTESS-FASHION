@@ -17,29 +17,30 @@ export default function Pagination({ page, pages, total, perPage, onChange, item
         {from}–{to} sur {total} {itemLabel}{total > 1 ? 's' : ''}
       </span>
       <div className="pagination-controls">
-        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(1)} disabled={page <= 1}>
+        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(1)} disabled={page <= 1} aria-label="Première page">
           «
         </button>
-        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(page - 1)} disabled={page <= 1}>
+        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Page précédente">
           ‹
         </button>
         {start > 1 && <span className="pagination-gap">…</span>}
-        {numbers.map((n) => (
+        {numbers.map((n, idx) => (
           <button
             key={n}
             type="button"
             className={`btn btn-sm ${n === page ? 'btn-or' : 'btn-contour'}`}
             onClick={() => onChange(n)}
             aria-current={n === page ? 'page' : undefined}
+            style={{ animationDelay: `${idx * 40}ms` }}
           >
             {n}
           </button>
         ))}
         {end < pages && <span className="pagination-gap">…</span>}
-        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(page + 1)} disabled={page >= pages}>
+        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(page + 1)} disabled={page >= pages} aria-label="Page suivante">
           ›
         </button>
-        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(pages)} disabled={page >= pages}>
+        <button type="button" className="btn btn-contour btn-sm" onClick={() => onChange(pages)} disabled={page >= pages} aria-label="Dernière page">
           »
         </button>
       </div>

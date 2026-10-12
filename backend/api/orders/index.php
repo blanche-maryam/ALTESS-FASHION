@@ -146,7 +146,21 @@ if ($method === 'GET') {
     }
 
     requireAuth();
-    apiJson(['orders' => $orderModel->getByUser(currentUserId(), ['status' => $_GET['status'] ?? null])]);
+    $page = max(1, (int) ($_GET['page'] ?? 1));
+    $perPage = max(1, min(100, (int) ($_GET['per_page'] ?? 8)));
+    $filters = [
+        'status' => $_GET['status'] ?? null,
+        'page' => $page,
+        'per_page' => $perPage,
+    ];
+    $total = $orderModel->countByUser(currentUserId(), $filters);
+    apiJson([
+        'orders'   => $orderModel->getByUser(currentUserId(), $filters),
+        'total'    => $total,
+        'page'     => $page,
+        'per_page' => $perPage,
+        'pages'    => (int) ceil($total / $perPage),
+    ]);
 }
 
 // -------------------------------------------------------------------------

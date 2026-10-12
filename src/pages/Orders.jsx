@@ -5,16 +5,23 @@ import { extractError } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import Loader from '../components/Loader.jsx';
+import Pagination from '../components/Pagination.jsx';
 import { formatPrice, formatDate } from '../utils/helpers.js';
 import { statusLabel, PAYMENT_METHODS } from '../utils/constants.js';
 import Modal from '../components/admin/Modal.jsx';
+import Reveal from '../components/Reveal.jsx';
 import { imageUrl } from '../utils/images.js';
+
+const PER_PAGE = 8;
 
 export default function Orders() {
   const { user, loading: authLoading } = useAuth();
   const toast = useToast();
 
   const [orders, setOrders] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -23,14 +30,16 @@ export default function Orders() {
     if (!user) { setLoading(false); return; }
     setLoading(true);
     try {
-      const data = await orderService.getMine();
+      const data = await orderService.getMine({ page, per_page: PER_PAGE });
       setOrders(data.orders || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 0);
     } catch (err) {
       toast.error(extractError(err, 'Impossible de charger vos commandes'));
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, toast, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -51,27 +60,43 @@ export default function Orders() {
   if (!user) return null;
 
   return (
-    <div className="container page-orders">
-      <h1>Mes commandes</h1>
+    <div className="container page-orders page-enter">
+      <Reveal as="h1" className="page-title">Mes commandes</Reveal>
+      <Reveal className="results-count" index={1} step={60}>
+        {total} commande(s)
+      </Reveal>
 
       {loading ? <Loader /> : orders.length === 0 ? (
-        <div className="empty-state">
+        <Reveal className="empty-state">
           <h3>Aucune commande</h3>
           <p className="muted">Vous n'avez encore rien commandé.</p>
           <Link to="/boutique" className="btn btn-or">Découvrir la boutique</Link>
-        </div>
+        </Reveal>
       ) : (
-        orders.map((order) => (
-          <div key={order.id} className="order-card">
-            <div className="order-header">
-              <span><strong>Commande :</strong> {order.order_number}</span>
-              <span><strong>Date :</strong> {formatDate(order.created_at)}</span>
-              <span><strong>Total :</strong> {formatPrice(order.total)}</span>
-              <span className={`status status-${order.status}`}>{statusLabel(order.status)}</span>
-              <button type="button" className="btn btn-contour btn-xs" onClick={() => openDetail(order)}>Détail</button>
+        orders.map((order, i) => (
+          <Reveal key={order.id} index={i} step={80}>
+            <div className="order-card">
+              <div className="order-header">
+                <span><strong>Commande :</strong> {order.order_number}</span>
+                <span><strong>Date :</strong> {formatDate(order.created_at)}</span>
+                <span><strong>Total :</strong> {formatPrice(order.total)}</span>
+                <span className={`status status-${order.status}`}>{statusLabel(order.status)}</span>
+                <button type="button" className="btn btn-contour btn-xs" onClick={() => openDetail(order)}>Détail</button>
+              </div>
             </div>
-          </div>
+          </Reveal>
         ))
+      )}
+
+      {pages > 1 && (
+        <Pagination
+          page={page}
+          pages={pages}
+          total={total}
+          perPage={PER_PAGE}
+          onChange={setPage}
+          itemLabel="commande"
+        />
       )}
 
       <Modal open={Boolean(detail)} title={detail ? `Commande ${detail.order_number}` : ''} onClose={() => setDetail(null)} size="lg">

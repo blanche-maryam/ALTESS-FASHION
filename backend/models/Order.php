@@ -54,9 +54,32 @@ class Order
             $params[':status'] = $filters['status'];
         }
         $sql .= ' ORDER BY created_at DESC';
+
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = max(1, min(100, (int) ($filters['per_page'] ?? 8)));
+        $sql .= ' LIMIT :offset, :limit';
+        $params[':offset'] = ($page - 1) * $perPage;
+        $params[':limit'] = $perPage;
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countByUser(int $userId, array $filters = []): int
+    {
+        $sql = 'SELECT COUNT(*) FROM orders WHERE user_id = :user_id';
+        $params = [':user_id' => $userId];
+        if (!empty($filters['status']) && in_array($filters['status'], self::STATUSES, true)) {
+            $sql .= ' AND status = :status';
+            $params[':status'] = $filters['status'];
+        }
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return (int) $stmt->fetchColumn();
     }
 
     public function getAll(array $filters = []): array
@@ -71,8 +94,10 @@ class Order
             $params[':status'] = $filters['status'];
         }
         if (!empty($filters['search'])) {
-            $sql .= ' AND (o.order_number LIKE :search OR u.firstname LIKE :search OR u.lastname LIKE :search OR u.email LIKE :search)';
-            $params[':search'] = '%' . $filters['search'] . '%';
+            // PDO refuse un paramÃ¨tre nommÃ© rÃ©utilisÃ© dans une native prepare
+            // (SQLSTATE[HY093]) : on Ã©chappe via quote() puis on interpole.
+            $needle = $this->pdo->quote('%' . $filters['search'] . '%');
+            $sql .= " AND (o.order_number LIKE $needle OR u.firstname LIKE $needle OR u.lastname LIKE $needle OR u.email LIKE $needle)";
         }
         if (!empty($filters['from'])) {
             $sql .= ' AND o.created_at >= :from';
@@ -110,8 +135,10 @@ class Order
             $params[':status'] = $filters['status'];
         }
         if (!empty($filters['search'])) {
-            $sql .= ' AND (o.order_number LIKE :search OR u.firstname LIKE :search OR u.lastname LIKE :search OR u.email LIKE :search)';
-            $params[':search'] = '%' . $filters['search'] . '%';
+            // PDO refuse un paramÃ¨tre nommÃ© rÃ©utilisÃ© dans une native prepare
+            // (SQLSTATE[HY093]) : on Ã©chappe via quote() puis on interpole.
+            $needle = $this->pdo->quote('%' . $filters['search'] . '%');
+            $sql .= " AND (o.order_number LIKE $needle OR u.firstname LIKE $needle OR u.lastname LIKE $needle OR u.email LIKE $needle)";
         }
         if (!empty($filters['from'])) {
             $sql .= ' AND o.created_at >= :from';

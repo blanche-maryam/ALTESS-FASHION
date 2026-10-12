@@ -7,16 +7,19 @@ import { USER_ROLES } from '../../utils/constants.js';
 import { formatPrice, formatDate } from '../../utils/helpers.js';
 import Modal from '../../components/admin/Modal.jsx';
 import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import Pagination from '../../components/admin/Pagination.jsx';
 
 const EMPTY = { firstname: '', lastname: '', email: '', phone: '', address: '', role: 'customer', is_active: 1, password: '' };
+const PER_PAGE = 20;
 
 export default function AdminUsers() {
   const toast = useToast();
   const { user: currentUser } = useAuth();
 
-  const [filters, setFilters] = useState({ search: '', role: '' });
+  const [filters, setFilters] = useState({ search: '', role: '', page: 1, per_page: PER_PAGE });
   const [searchInput, setSearchInput] = useState('');
   const [users, setUsers] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, pages: 0, page: 1, per_page: PER_PAGE });
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
@@ -30,6 +33,12 @@ export default function AdminUsers() {
     try {
       const data = await userService.getAll(filters);
       setUsers(data.users || []);
+      setMeta({
+        total: data.total || 0,
+        pages: data.pages || 0,
+        page: data.page || 1,
+        per_page: data.per_page || PER_PAGE,
+      });
     } catch (err) {
       toast.error(extractError(err, 'Impossible de charger les clients'));
       setUsers([]);
@@ -42,7 +51,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setFilters((f) => (f.search === searchInput ? f : { ...f, search: searchInput }));
+      setFilters((f) => (f.search === searchInput ? f : { ...f, search: searchInput, page: 1 }));
     }, 350);
     return () => clearTimeout(timer);
   }, [searchInput]);
@@ -140,7 +149,7 @@ export default function AdminUsers() {
       <header className="admin-page-header">
         <div>
           <h1>Clients</h1>
-          <p className="muted">{users.length} compte(s)</p>
+          <p className="muted">{meta.total} compte(s)</p>
         </div>
       </header>
 
@@ -160,13 +169,13 @@ export default function AdminUsers() {
           <select
             id="u-role"
             value={filters.role}
-            onChange={(e) => setFilters((f) => ({ ...f, role: e.target.value }))}
+            onChange={(e) => setFilters((f) => ({ ...f, role: e.target.value, page: 1 }))}
           >
             <option value="">Tous</option>
             {USER_ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
         </div>
-        <button type="button" className="btn btn-contour" onClick={() => { setSearchInput(''); setFilters({ search: '', role: '' }); }}>
+        <button type="button" className="btn btn-contour" onClick={() => { setSearchInput(''); setFilters({ search: '', role: '', page: 1, per_page: PER_PAGE }); }}>
           Réinitialiser
         </button>
       </section>
@@ -179,8 +188,9 @@ export default function AdminUsers() {
           <p className="muted">Aucun compte ne correspond à cette recherche.</p>
         </div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
             <thead>
               <tr>
                 <th>Client</th>
@@ -241,8 +251,18 @@ export default function AdminUsers() {
                 );
               })}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+
+          <Pagination
+            page={meta.page}
+            pages={meta.pages}
+            total={meta.total}
+            perPage={meta.per_page}
+            itemLabel="client"
+            onChange={(page) => setFilters((f) => ({ ...f, page }))}
+          />
+        </>
       )}
 
       <Modal

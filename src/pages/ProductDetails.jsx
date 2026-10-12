@@ -58,7 +58,7 @@ export default function ProductDetails() {
   if (notFound || !product) {
     return (
       <div className="container padding">
-        <h1>Produit introuvable</h1>
+        <h1 className="page-title">Produit introuvable</h1>
         <p className="muted">Ce produit n'existe pas ou n'est plus disponible.</p>
         <Link to="/boutique" className="btn btn-or">Découvrir la boutique</Link>
       </div>

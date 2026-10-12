@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Reveal from '../components/Reveal.jsx';
 import { Contact_Infos, WhatsApp_Lien, contactMailto, contactTel } from '../global.jsx';
 
 export default function Contact() {
@@ -15,9 +16,9 @@ export default function Contact() {
 
   return (
     <div className="container page-contact">
-      <h1>Contactez-nous</h1>
+      <Reveal as="h1" className="page-title">Contactez-nous</Reveal>
       <div className="contact-grid">
-        <div className="contact-info">
+        <Reveal className="contact-info">
           <h3>Informations</h3>
           <p><strong>Téléphone:</strong> <a href={contactTel}>{Contact_Infos.telephone}</a></p>
           <p><strong>WhatsApp:</strong> <a href={WhatsApp_Lien} target="_blank" rel="noopener noreferrer">{Contact_Infos.telephone}</a></p>
@@ -28,20 +29,28 @@ export default function Contact() {
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
             ))}
           </div>
-        </div>
-        <div className="contact-form-wrapper">
+        </Reveal>
+        <Reveal variant="right" className="contact-form-wrapper">
           {sent ? (
-            <p className="success-msg">Merci pour votre message ! Nous vous répondrons sous peu.</p>
+            <p className="success-msg anim-scale-in">Merci pour votre message ! Nous vous répondrons sous peu.</p>
           ) : (
             <form onSubmit={handleSubmit}>
-              <div className="champ"><label>Nom</label><input name="name" value={form.name} onChange={handleChange} required /></div>
-              <div className="champ"><label>Email</label><input type="email" name="email" value={form.email} onChange={handleChange} required /></div>
-              <div className="champ"><label>Objet</label><input name="subject" value={form.subject} onChange={handleChange} required /></div>
-              <div className="champ"><label>Message</label><textarea name="message" value={form.message} onChange={handleChange} rows={5} required /></div>
-              <button type="submit" className="btn btn-primaire">Envoyer</button>
+              {['name','email','subject','message'].map((name, i) => (
+                <Reveal key={name} index={i} step={70} className="champ">
+                  <label>{name==='name'?'Nom':name==='email'?'Email':name==='subject'?'Objet':'Message'}</label>
+                  {name === 'message' ? (
+                    <textarea name={name} value={form[name]} onChange={handleChange} rows={5} required />
+                  ) : (
+                    <input type={name==='email'?'email':'text'} name={name} value={form[name]} onChange={handleChange} required />
+                  )}
+                </Reveal>
+              ))}
+              <Reveal index={4} step={70}>
+                <button type="submit" className="btn btn-primaire">Envoyer</button>
+              </Reveal>
             </form>
           )}
-        </div>
+        </Reveal>
       </div>
     </div>
   );

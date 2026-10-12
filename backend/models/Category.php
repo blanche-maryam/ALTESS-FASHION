@@ -28,7 +28,7 @@ class Category
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTree(): array
+    public function getTree(int $page = 1, int $perPage = 0): array
     {
         $all = $this->getAll(false);
         $byParent = [];
@@ -43,7 +43,28 @@ class Category
             }
             return $nodes;
         };
-        return $build(0);
+
+        // Racines : pagination optionnelle (0 = tout, compatibilité).
+        // Les enfants restent imbriqués sous leur racine.
+        $roots = $byParent[0] ?? [];
+        if ($perPage > 0) {
+            $page = max(1, $page);
+            $perPage = max(1, min(100, $perPage));
+            $roots = array_slice($roots, ($page - 1) * $perPage, $perPage);
+        }
+
+        $tree = [];
+        foreach ($roots as $cat) {
+            $cat['children'] = $build((int) $cat['id']);
+            $tree[] = $cat;
+        }
+        return $tree;
+    }
+
+    public function countRoots(): int
+    {
+        $stmt = $this->pdo->query('SELECT COUNT(*) FROM categories WHERE parent_id IS NULL');
+        return (int) $stmt->fetchColumn();
     }
 
     public function getRoots(bool $activeOnly = true): array

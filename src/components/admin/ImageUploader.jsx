@@ -1,7 +1,17 @@
 import { useRef, useState } from 'react';
 import { imageUrl } from '../../utils/images.js';
 
-export default function ImageUploader({ images = [], onUpload, onRemove, onSetPrimary, disabled = false, max = 8, label = 'Images' }) {
+export default function ImageUploader({
+  images = [],
+  onUpload,
+  onRemove,
+  onSetPrimary,
+  disabled = false,
+  max = 8,
+  label = 'Images',
+  deferred = false,
+  hint = '',
+}) {
   const inputRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
@@ -16,7 +26,11 @@ export default function ImageUploader({ images = [], onUpload, onRemove, onSetPr
     const selected = files.slice(0, room);
 
     setBusy(true);
-    setProgress(`Téléversement de ${selected.length} image(s)...`);
+    setProgress(
+      deferred
+        ? `${selected.length} image(s) seront ajoutées à l'enregistrement`
+        : `Téléversement de ${selected.length} image(s)...`
+    );
     try {
       await onUpload(selected);
     } finally {
@@ -49,6 +63,7 @@ export default function ImageUploader({ images = [], onUpload, onRemove, onSetPr
       />
 
       {progress && <p className="muted small">{progress}</p>}
+      {hint && <p className="muted small">{hint}</p>}
 
       {images.length === 0 ? (
         <div className="image-dropzone">
@@ -56,14 +71,17 @@ export default function ImageUploader({ images = [], onUpload, onRemove, onSetPr
         </div>
       ) : (
         <ul className="image-grid">
-          {images.map((img) => {
-            const isPrimary = Number(img.is_primary) === 1;
+          {images.map((img, index) => {
+            const isPending = Boolean(img.pending);
+            const isPrimary = !isPending && Number(img.is_primary) === 1;
+            const src = img.previewUrl || imageUrl(img.image_path) || '/product-placeholder.svg';
             return (
-              <li key={img.id} className={`image-item ${isPrimary ? 'is-primary' : ''}`}>
-                <img src={imageUrl(img.image_path) || '/product-placeholder.svg'} alt={img.alt_text || ''} />
+              <li key={img.id || img.previewUrl || `pending-${index}`} className={`image-item ${isPrimary ? 'is-primary' : ''} ${isPending ? 'is-pending' : ''}`}>
+                <img src={src} alt={img.alt_text || img.name || ''} />
                 {isPrimary && <span className="image-badge">Principale</span>}
+                {isPending && <span className="image-badge">En attente</span>}
                 <div className="image-item-actions">
-                  {!isPrimary && onSetPrimary && (
+                  {!isPrimary && !isPending && onSetPrimary && (
                     <button type="button" className="btn btn-contour btn-xs" onClick={() => onSetPrimary(img)} disabled={disabled}>
                       Principale
                     </button>

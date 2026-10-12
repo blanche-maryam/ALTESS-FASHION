@@ -7,6 +7,7 @@ import { AUDIENCES } from '../../utils/constants.js';
 import { imageUrl } from '../../utils/images.js';
 import Modal from '../../components/admin/Modal.jsx';
 import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import Pagination from '../../components/admin/Pagination.jsx';
 
 const EMPTY = {
   name: '',
@@ -17,6 +18,8 @@ const EMPTY = {
   is_active: 1,
   sort_order: 0,
 };
+
+const PER_PAGE = 10;
 
 function renderTree(nodes, depth, editingId, onEdit, onDelete, onToggle) {
   return nodes.map((node) => (
@@ -59,6 +62,9 @@ export default function AdminCategories() {
 
   const [tree, setTree] = useState([]);
   const [flat, setFlat] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -72,15 +78,18 @@ export default function AdminCategories() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await categoryService.getTree();
+      const data = await categoryService.getTree({ page, per_page: PER_PAGE });
       setTree(data.categories || []);
       setFlat(data.flat || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 0);
+      if (data.pages && data.pages < page) setPage(data.pages);
     } catch (err) {
       toast.error(extractError(err, 'Impossible de charger les catégories'));
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -197,7 +206,7 @@ export default function AdminCategories() {
       <header className="admin-page-header">
         <div>
           <h1>Catégories</h1>
-          <p className="muted">{flat.length} catégorie(s) — les modifications sont visibles immédiatement sur la boutique</p>
+          <p className="muted">{total} catégorie(s) — les modifications sont visibles immédiatement sur la boutique</p>
         </div>
         <button type="button" className="btn btn-or" onClick={() => openCreate()}>+ Nouvelle catégorie</button>
       </header>
@@ -211,9 +220,20 @@ export default function AdminCategories() {
           <button type="button" className="btn btn-or" onClick={() => openCreate()}>+ Nouvelle catégorie</button>
         </div>
       ) : (
-        <ul className="tree">
-          {renderTree(tree, 0, editing?.id, openEdit, setToDelete, handleToggle)}
-        </ul>
+        <>
+          <ul className="tree">
+            {renderTree(tree, 0, editing?.id, openEdit, setToDelete, handleToggle)}
+          </ul>
+
+          <Pagination
+            page={page}
+            pages={pages}
+            total={total}
+            perPage={PER_PAGE}
+            itemLabel="catégorie"
+            onChange={setPage}
+          />
+        </>
       )}
 
       <Modal

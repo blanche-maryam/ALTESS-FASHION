@@ -6,6 +6,7 @@ import { extractError } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import Loader from '../components/Loader.jsx';
+import Reveal from '../components/Reveal.jsx';
 import { formatDate } from '../utils/helpers.js';
 
 export default function Account() {
@@ -98,7 +99,7 @@ export default function Account() {
     return (
       <div className="container page-account">
         <div className="empty-state">
-          <h1>Connexion requise</h1>
+          <h1 className="page-title">Connexion requise</h1>
           <p className="muted">Connectez-vous pour accéder à votre compte.</p>
           <Link to="/connexion" className="btn btn-or">Se connecter</Link>
         </div>
@@ -107,20 +108,22 @@ export default function Account() {
   }
 
   return (
-    <div className="container page-account">
-      <h1>Mon compte</h1>
+    <div className="container page-account page-enter">
+      <Reveal as="h1" className="page-title">Mon compte</Reveal>
 
-      <div className="account-tabs">
-        <button type="button" className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
-          Profil
-        </button>
-        <button type="button" className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>
-          Sécurité
-        </button>
-      </div>
+      <Reveal index={1} step={80}>
+        <div className="account-tabs">
+          <button type="button" className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+            Profil
+          </button>
+          <button type="button" className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>
+            Sécurité
+          </button>
+        </div>
+      </Reveal>
 
       {activeTab === 'profile' && profile && (
-        <form className="account-section" onSubmit={handleSaveProfile}>
+        <Reveal index={2} step={80} className="account-section">
           <h2>Informations personnelles</h2>
           <div className="field-row">
             <div className="field">
@@ -149,11 +152,11 @@ export default function Account() {
           <button type="submit" className="btn btn-or" disabled={saving}>
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </button>
-        </form>
+        </Reveal>
       )}
 
       {activeTab === 'password' && (
-        <form className="account-section" onSubmit={handleChangePassword}>
+        <Reveal index={3} step={80} className="account-section">
           <h2>Changer le mot de passe</h2>
           <div className="field">
             <label htmlFor="a-curpass">Mot de passe actuel</label>
@@ -193,16 +196,16 @@ export default function Account() {
           <button type="submit" className="btn btn-or" disabled={saving}>
             {saving ? 'Modification...' : 'Modifier le mot de passe'}
           </button>
-        </form>
+        </Reveal>
       )}
 
-      <div className="account-footer">
+      <Reveal index={4} step={80} className="account-footer">
         {user.role === 'admin' && (
           <Link to="/admin" className="btn btn-contour">Espace administrateur</Link>
         )}
         <Link to="/mes-commandes" className="btn btn-contour">Mes commandes</Link>
         <button type="button" className="btn btn-danger" onClick={handleLogout}>Déconnexion</button>
-      </div>
+      </Reveal>
     </div>
   );
 }

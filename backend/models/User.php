@@ -76,7 +76,7 @@ class User
         return $stmt->execute($params);
     }
 
-    public function getAll(?string $search = null, ?string $role = null, ?int $limit = 200): array
+    public function getAll(?string $search = null, ?string $role = null, int $page = 1, int $perPage = 20): array
     {
         $sql = 'SELECT u.id, u.lastname, u.firstname, u.email, u.phone, u.role, u.is_active, u.created_at, '
              . '(SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) as order_count, '
@@ -85,18 +85,48 @@ class User
         $params = [];
 
         if (!empty($search)) {
-            $sql .= ' AND (u.firstname LIKE :search OR u.lastname LIKE :search OR u.email LIKE :search)';
-            $params[':search'] = '%' . $search . '%';
+            // PDO refuse un paramètre nommé réutilisé dans une native prepare
+            // (SQLSTATE[HY093]) : on échappe via quote() puis on interpole.
+            $needle = $this->pdo->quote('%' . $search . '%');
+            $sql .= " AND (u.firstname LIKE $needle OR u.lastname LIKE $needle OR u.email LIKE $needle)";
         }
         if (!empty($role) && in_array($role, ['admin', 'customer'], true)) {
             $sql .= ' AND u.role = :role';
             $params[':role'] = $role;
         }
-        $sql .= ' ORDER BY u.created_at DESC LIMIT ' . (int) $limit;
+        $sql .= ' ORDER BY u.created_at DESC';
+
+        $page = max(1, $page);
+        $perPage = max(1, min(100, $perPage));
+        $sql .= ' LIMIT :offset, :limit';
+        $params[':offset'] = ($page - 1) * $perPage;
+        $params[':limit'] = $perPage;
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countAll(?string $search = null, ?string $role = null): int
+    {
+        $sql = 'SELECT COUNT(*) FROM users u WHERE 1=1';
+        $params = [];
+
+        if (!empty($search)) {
+            $needle = $this->pdo->quote('%' . $search . '%');
+            $sql .= " AND (u.firstname LIKE $needle OR u.lastname LIKE $needle OR u.email LIKE $needle)";
+        }
+        if (!empty($role) && in_array($role, ['admin', 'customer'], true)) {
+            $sql .= ' AND u.role = :role';
+            $params[':role'] = $role;
+        }
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return (int) $stmt->fetchColumn();
     }
 
     public function getOrderCount(int $userId): int
